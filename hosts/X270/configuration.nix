@@ -1,20 +1,29 @@
 # configuration.nix
-
-{ inputs, config, lib, pkgs, ... }:
+{ config,
+  inputs,
+  lib,
+  pkgs,
+  outputs,
+  ...
+}:
 
 {
   imports =
     [
       ./hardware-configuration.nix
+      ../../modules/nixos/default.nix
     ];
 
   # NOTE: systemd-boot configuration (UEFI only).
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+  };
   # NOTE: Network configuration.
   networking = {
-    hostName = "nixos";
+    hostName = "NixOS";
     networkmanager.enable = true;
   #  proxy = { 
   #    default = "http://user:password@proxy:port/";
@@ -50,17 +59,27 @@
         enable = true;
         support32Bit = true;
       };
-      jack.enable = true;
+      # jack.enable = true; # NOTE: Uncomment if want to use JACK applications.
       pulse.enable = true;
+      wireplumber = {
+        extraConfig.bluetoothEnhancements = {
+          "monitor.bluez.properties" = {
+            "bluez5.enable-sbc-xq" = true;
+            "bluez5.enable-msbc" = true;
+            "bluez5.enable-hw-volume" = true;
+            "bluez5.roles" = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
+          };
+        };
+      };
     };
 
     displayManager.sddm = { # SDDM with Wayland support.
       enable = true;
-      autoNumlock = true;
       wayland.enable = true;
     };
     desktopManager.plasma6.enable = true;
   };
+  security.rtkit.enable = true; # recommended for PipeWire setup.
 
   # NOTE: System firmwares and drivers.
   hardware = {
@@ -68,13 +87,18 @@
       enable = true;
       powerOnBoot = false;
     };
-    graphics.enable = true; # for GPU acceleration.
+    graphics = {
+      enable = true; # for GPU acceleration.
+      enable32Bit = true; # for 32-bit applications such Wine
+    };
     cpu.intel.updateMicrocode = true;
   };
 
   # NOTE: User and groups management.
   users.users.caio = {
+    description = "Caio";
     isNormalUser = true;
+    uid = 1000;
     extraGroups = [
       "wheel"
       "audio"
@@ -82,9 +106,6 @@
       "adbusers"
     ];
   };
-
-  # NOTE: Firefox as default web browser.
-  programs.firefox.enable = true;
 
   # NOTE: Nixpkgs configuration.
   nixpkgs = {
@@ -95,13 +116,37 @@
 
   # NOTE: System-wide package management.
   environment.systemPackages = with pkgs; [
-    vim
-    wget
-    curl
-    tree
+    # Environment
+    hunspell
+    hunspellDicts.pt_BR
+    libreoffice-qt
     python3Full
-  ];
+    vim
 
+    # Utils
+    curl
+    fastfetch
+    fzf
+    killall
+    htop
+    ripgrep
+    wget
+
+    # File compression.
+    bzip2
+    gzip
+    p7zip
+    rar
+    unar
+    unrar
+    xz
+
+    # MS core fonts.
+    corefonts
+    vista-fonts
+  ];
+  programs.firefox.enable = true; # Firefox as default browser.
+  
   # NOTE: Enable flakes and deduplicated store.
   nix = {
     settings = {
@@ -115,19 +160,9 @@
     };
   };
 
-  # NOTE: Enable SSH and GPG.
-  services.openssh = {
-    enable = true;
-    settings = {
-      AllowUsers = [ "caio" ];
-      PasswordAuthentication = false;
-      # PermitRootLogin = "yes";
-    };
-  };
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
+  # NOTE: appimage-run setup.
+  programs.appimage.enable = true;
+  programs.appimage.binfmt = true;
 
   # NOTE: Firewall ports configuration.
   networking.firewall = {

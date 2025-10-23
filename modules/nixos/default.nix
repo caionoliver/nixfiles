@@ -1,4 +1,8 @@
 # For NixOS modules.
 {
-  # my-module = import ./my-module.nix
+  imports = [
+    ./gaming.nix
+    ./ssh.nix
+    ./virtualization.nix
+  ];
 }

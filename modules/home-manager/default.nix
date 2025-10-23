@@ -1,4 +1,13 @@
 # For home-manager modules.
 {
-  # my-module = import ./my-module.nix
+  config,
+  pkgs,
+  ...
+}:
+
+{
+  imports = [
+    ./cli/git.nix
+    ./apps.nix
+  ];
 }
