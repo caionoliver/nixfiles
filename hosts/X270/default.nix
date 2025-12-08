@@ -1,26 +1,30 @@
-# configuration.nix
-{ config,
-  inputs,
-  lib,
-  pkgs,
-  outputs,
-  ...
-}:
+# System Environment configuration (it replaces /etc/nixos/configuration.nix).
+# Check https://nixos.org/manual/nixos/stable/options for more options (stable branch).
 
 {
-  imports =
-    [
+  config,
+  inputs,
+  lib,
+  outputs,
+  pkgs,
+  ...
+}: 
+{
+  imports = [
+      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
+      outputs.nixosModules.bundle # "modules/default.nix"
       ./hardware-configuration.nix
-      ../../modules/nixos/default.nix
     ];
 
   # NOTE: systemd-boot configuration (UEFI only).
-  boot = {
-    loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/boot";
     };
   };
+
   # NOTE: Network configuration.
   networking = {
     hostName = "NixOS";
@@ -37,11 +41,10 @@
   i18n.defaultLocale = "pt_BR.UTF-8";
   console = {
     font = "Lat2-Terminus16";
-  #  keyMap = "br";
-    useXkbConfig = true; # use xkb.options in tty.
+    useXkbConfig = true;
   };
 
-  # NOTE: Primary services (X11 support, audio server, etc).
+  # NOTE: X11 support, audio server, etc.
   services = {
     xserver = {
       enable = true;
@@ -49,30 +52,17 @@
         layout = "br";
       };
     };
-
     libinput.enable = true; # Touchpad support.
-    printing.enable = true; # Printing system.
-
+    printing.enable = false; # Printing system.
     pipewire = {
       enable = true;
       alsa = {
         enable = true;
         support32Bit = true;
       };
-      # jack.enable = true; # NOTE: Uncomment if want to use JACK applications.
+      # jack.enable = true; # Uncomment for use JACK applications.
       pulse.enable = true;
-      wireplumber = {
-        extraConfig.bluetoothEnhancements = {
-          "monitor.bluez.properties" = {
-            "bluez5.enable-sbc-xq" = true;
-            "bluez5.enable-msbc" = true;
-            "bluez5.enable-hw-volume" = true;
-            "bluez5.roles" = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
-          };
-        };
-      };
     };
-
     displayManager.sddm = { # SDDM with Wayland support.
       enable = true;
       wayland.enable = true;
@@ -80,19 +70,6 @@
     desktopManager.plasma6.enable = true;
   };
   security.rtkit.enable = true; # recommended for PipeWire setup.
-
-  # NOTE: System firmwares and drivers.
-  hardware = {
-    bluetooth = {
-      enable = true;
-      powerOnBoot = false;
-    };
-    graphics = {
-      enable = true; # for GPU acceleration.
-      enable32Bit = true; # for 32-bit applications such Wine
-    };
-    cpu.intel.updateMicrocode = true;
-  };
 
   # NOTE: User and groups management.
   users.users.caio = {
@@ -107,9 +84,32 @@
     ];
   };
 
-  # NOTE: Nixpkgs configuration.
+  # NOTE: Nix package management configuration.
+  nix = let
+    flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+  in {
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
+      flake-registry = ""; # Disable flake global registry.
+      nix-path = config.nix.nixPath; # For flakes on NIX_PATH.
+      auto-optimise-store = true;
+    };
+
+    # NOTE: Disable channels, setting flakeInputs on flake registry and NIX_PATH.
+    channel.enable = false;
+    registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
+    nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
+
+    # NOTE: Garbage collecting configuration.
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older than 15d";
+    };
+  };
   nixpkgs = {
     config = {
+      # NOTE: If you do not want unfree packages, change to "false".
       allowUnfree = true;
     };
   };
@@ -120,7 +120,7 @@
     hunspell
     hunspellDicts.pt_BR
     libreoffice-qt
-    python3Full
+    python3
     vim
 
     # Utils
@@ -131,6 +131,7 @@
     htop
     ripgrep
     wget
+    which
 
     # File compression.
     bzip2
@@ -139,30 +140,21 @@
     rar
     unar
     unrar
+    unzip
     xz
+    zip
 
     # MS core fonts.
     corefonts
     vista-fonts
   ];
   programs.firefox.enable = true; # Firefox as default browser.
-  
-  # NOTE: Enable flakes and deduplicated store.
-  nix = {
-    settings = {
-      experimental-features = [ "nix-command" "flakes" ];
-      auto-optimise-store = true;
-    };
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older than 15d";
-    };
-  };
 
   # NOTE: appimage-run setup.
   programs.appimage.enable = true;
   programs.appimage.binfmt = true;
+
+  services.flatpak.enable = true;
 
   # NOTE: Firewall ports configuration.
   networking.firewall = {
@@ -171,11 +163,29 @@
     # allowedUDPPorts = [ ... ];
   };
 
+  # NOTE: Bluetooth setup.
+  hardware = {
+    bluetooth = {
+      enable = true;
+      powerOnBoot = false;
+      settings = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+        };
+      };
+    };
+    # NOTE: Enable OpenGL for GPU acceleration
+    graphics = {
+      enable = true;
+      enable32Bit = true; # for 32-bit applications such Wine
+      extraPackages = with pkgs; [ intel-media-driver ];
+    };
+  };
   # NOTE: Enable ADB and Java module for audiosource.
   programs.adb.enable = true;
   programs.java.enable = true;
  
-  system.stateVersion = "25.05"; # NOT CHANGE UNTIL READ RELEASE NOTES.
+  system.stateVersion = "25.11"; # NOT CHANGE UNTIL READ RELEASE NOTES.
 
 }
 

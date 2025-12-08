@@ -1,13 +1,13 @@
 # For home-manager modules.
+let
+  modulePaths = {
+    apps = import ./apps.nix;
+  };
+in
 {
-  config,
-  pkgs,
-  ...
-}:
+  bundle = {
+    imports = builtins.attrValues modulePaths;
+  };
 
-{
-  imports = [
-    ./cli/git.nix
-    ./apps.nix
-  ];
+  modules = builtins.mapAttrs (_: import) modulePaths;
 }

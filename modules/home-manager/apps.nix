@@ -1,22 +1,20 @@
-{
-  config,
-  pkgs,
-  ...
-}:
+{ config, pkgs, ... }: 
 
 {
   home.packages = with pkgs; [
     # Socials
-    discord
     spotify
     telegram-desktop
+    discord
+    vesktop
 
-    # Image and video
+    # Images and office
     gimp
-    inkscape
     pdfstudioviewer
     masterpdfeditor
-    stirling-pdf
+    onlyoffice-documentserver
+    onlyoffice-desktopeditors
+    kdePackages.kdenlive
 
     # Security
     bitwarden-desktop

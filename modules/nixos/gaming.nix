@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: 
+{ pkgs, ... }: 
 
 {
   programs.steam = {
@@ -13,7 +10,6 @@
     bottles
     heroic
     lutris
-    protonplus
     protonup-qt
   ];
   environment.sessionVariables = {

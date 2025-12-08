@@ -2,31 +2,32 @@
   description = "My NixOS flake-powered config";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-hardware, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  let
+    inherit (self) outputs;
+  in {
     nixosModules = import ./modules/nixos;
     homeManagerModules = import ./modules/home-manager;
     nixosConfigurations = {
       X270 = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs outputs; };
         modules = [
-          ./hosts/X270/configuration.nix
-          nixos-hardware.nixosModules.lenovo-thinkpad-x270
+          ./hosts/X270/default.nix
           home-manager.nixosModules.home-manager
           {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              users.caio = import ./hosts/X270/home.nix;
-              extraSpecialArgs = { inherit inputs; };
+              users.caio = import ./users/caio/default.nix;
+              extraSpecialArgs = { inherit inputs outputs; };
             };
           }
         ];
