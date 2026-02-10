@@ -12,9 +12,7 @@
     gimp
     pdfstudioviewer
     masterpdfeditor
-    onlyoffice-documentserver
-    onlyoffice-desktopeditors
-    kdePackages.kdenlive
+    obsidian
 
     # Security
     bitwarden-desktop
