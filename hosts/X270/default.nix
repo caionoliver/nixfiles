@@ -2,19 +2,21 @@
 # Check https://nixos.org/manual/nixos/stable/options for more options (stable branch).
 
 {
-  config,
   inputs,
+  config,
   lib,
-  outputs,
   pkgs,
   ...
 }: 
 {
   imports = [
-      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
-      outputs.nixosModules.bundle # "modules/default.nix"
       ./hardware-configuration.nix
+
+      inputs.self.nixosModules.default # "modules/default.nix"
+      inputs.home-manager.nixosModules.home-manager
+      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
     ];
+  nixos.allModules.enable = true;
 
   # NOTE: systemd-boot configuration (UEFI only).
   boot.loader = {
@@ -25,7 +27,6 @@
     };
   };
 
-  # NOTE: Network configuration.
   networking = {
     hostName = "NixOS";
     networkmanager.enable = true;
@@ -35,7 +36,6 @@
   #  };
   };
 
-  # NOTE: Locale settings and sychronize to hardware.
   time.timeZone = "America/Bahia";
 
   i18n.defaultLocale = "pt_BR.UTF-8";
@@ -60,7 +60,6 @@
         enable = true;
         support32Bit = true;
       };
-      # jack.enable = true; # Uncomment for use JACK applications.
       pulse.enable = true;
     };
     displayManager.sddm = { # SDDM with Wayland support.
@@ -104,13 +103,20 @@
     gc = {
       automatic = true;
       dates = "weekly";
-      options = "--delete-older-than 15d";
+      options = "--delete-older-than 7d";
     };
   };
   nixpkgs = {
+    overlays = [
+      inputs.self.outputs.overlays.additions
+      inputs.self.outputs.overlays.modifications
+    ];
     config = {
       # NOTE: If you do not want unfree packages, change to "false".
       allowUnfree = true;
+      permittedInsecurePackages = [
+        "electron-39.8.10"
+      ];
     };
   };
 
@@ -120,6 +126,9 @@
     hunspell
     hunspellDicts.pt_BR
     libreoffice-qt
+
+    # Development
+    android-tools
     python3
     vim
 
@@ -129,6 +138,7 @@
     fzf
     killall
     htop
+    pulseaudio
     ripgrep
     wget
     which
@@ -144,11 +154,15 @@
     xz
     zip
 
-    # MS core fonts.
+    # Fonts.
     corefonts
     vista-fonts
+    freefont_ttf
   ];
   programs.firefox.enable = true; # Firefox as default browser.
+
+  # NOTE: Enable .local/bin in $PATH
+  environment.localBinInPath = true;
 
   # NOTE: appimage-run setup.
   programs.appimage.enable = true;
@@ -174,18 +188,27 @@
         };
       };
     };
-    # NOTE: Enable OpenGL for GPU acceleration
+    # NOTE: Enable GPU acceleration
     graphics = {
       enable = true;
       enable32Bit = true; # for 32-bit applications such Wine
       extraPackages = with pkgs; [ intel-media-driver ];
     };
   };
-  # NOTE: Enable ADB and Java module for audiosource.
-  programs.adb.enable = true;
+
+  # NOTE: Enable Java module for github/gdzx/audiosource.
+  # For use mobile as microphone (OPTIONAL)
   programs.java.enable = true;
- 
-  system.stateVersion = "25.11"; # NOT CHANGE UNTIL READ RELEASE NOTES.
+
+  # NOTE: Home Manager configuration
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = { inherit inputs; };
+    users.caio = import ../../users/caio/default.nix;
+  };
+
+  system.stateVersion = "26.05"; # NOT CHANGE UNTIL READ RELEASE NOTES.
 
 }
 

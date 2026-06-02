@@ -1,15 +1,24 @@
 # For NixOS modules.
+{ config, lib, inputs, ... }:
 let
-  modulePaths = {
-    gaming = import ./gaming.nix;
-    ssh = import ./ssh.nix;
-    libvirt = import ./libvirt.nix;
-  };
+  cfg = config.nixos.allModules;
+
+  gaming = ./gaming.nix;
+  ssh = ./ssh.nix;
+  libvirt = ./libvirt.nix;
 in
 {
-  bundle = { 
-    imports = builtins.attrValues modulePaths;
-  };
+  imports = [
+    gaming
+    ssh
+    libvirt
+  ];
 
-  modules = builtins.mapAttrs (_: import) modulePaths;
+  options.nixos.allModules.enable = lib.mkEnableOption "Enable all system-wide modules";
+
+  config = lib.mkIf cfg.enable {
+    nixos.gaming.enable = lib.mkDefault true;
+    nixos.ssh.enable = lib.mkDefault true;
+    nixos.libvirt.enable = lib.mkDefault true;
+  };
 }

@@ -1,13 +1,18 @@
 # For home-manager modules.
+{ config, lib, inputs, ... }:
 let
-  modulePaths = {
-    apps = import ./apps.nix;
-  };
+  cfg = config.home.allModules;
+
+  apps = ./apps.nix;
 in
 {
-  bundle = {
-    imports = builtins.attrValues modulePaths;
-  };
+  imports = [
+    apps
+  ];
 
-  modules = builtins.mapAttrs (_: import) modulePaths;
+  options.home.allModules.enable = lib.mkEnableOption "Enable all user-wide modules";
+
+  config = lib.mkIf cfg.enable {
+    home.common-apps.enable = lib.mkDefault true;
+  };
 }

@@ -6,19 +6,20 @@
   inputs,
   lib,
   pkgs,
-  outputs,
   ...
 }:
 {
   imports = [
-    outputs.homeManagerModules.bundle
+    inputs.self.homeManagerModules.default
     ./git.nix
   ];
+  home.allModules.enable = true;
 
   # NOTE: Setup home configuration.
   home.username = "caio";
   home.homeDirectory = "/home/caio";
-  home.stateVersion = "25.11"; # NOT CHANGE THIS UNTIL READ REALEASE NOTES.
+  home.stateVersion = "26.05"; # NOT CHANGE THIS UNTIL READ REALEASE NOTES.
+  fonts.fontconfig.enable = true;
   xdg.enable = true;
 
   programs.home-manager.enable = true;
