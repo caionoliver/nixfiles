@@ -12,7 +12,6 @@
   imports = [
       ./hardware-configuration.nix
 
-      inputs.self.nixosModules.default # "modules/default.nix"
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
     ];
   nixos.allModules.enable = true;

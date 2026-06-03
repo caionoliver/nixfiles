@@ -10,27 +10,26 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
-
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  let
+    lib = import ./lib inputs;
+  in {
     overlays = import ./overlays { inherit inputs; };
     nixosModules.default = import ./modules/nixos;
     homeManagerModules.default = import ./modules/home;
 
     nixosConfigurations = {
-      X270 = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/X270/default.nix
-        ];
+      X270 = lib.mkSystem {
+        hostname = "X270";
+        system = "x86_64-linux";
       };
     };
+
     homeConfigurations = {
-      "caio@X270" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = { inherit inputs; };
-        modules = [
-          ./users/caio/default.nix
-        ];
+      "caio@X270" = lib.mkUser {
+        username = "caio";
+        hostname = "X270";
+        system = "x86_64-linux";
       };
     };
   };

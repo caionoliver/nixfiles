@@ -11,8 +11,6 @@
 {
   imports = [
     ./git.nix
-
-    inputs.self.homeManagerModules.default
   ];
   home.allModules.enable = true;
 
