@@ -3,10 +3,10 @@ inputs @ { nixpkgs, home-manager, self, ... }:
 home-manager.lib.homeManagerConfiguration {
   pkgs = import nixpkgs {
     inherit system;
-
     config = {
       allowUnfree = true;
     };
+    overlays = builtins.attrValues inputs.self.overlays;
   };
 
   extraSpecialArgs = {

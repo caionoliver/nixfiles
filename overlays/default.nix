@@ -12,5 +12,11 @@
     valkey = prev.valkey.overrideAttrs (oldAttrs: {
       doCheck = false;
     });
+    discord-krisp = final: prev: {
+      discord = (import inputs.nixpkgs-discord-krisp {
+        system = prev.system;
+        config.allowUnfree = true;
+      }).discord.override { withKrisp = true; };
+    };
   };
 }

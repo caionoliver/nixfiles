@@ -23,7 +23,9 @@
     },
     "nixos-hardware": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1780310866,
@@ -42,19 +44,6 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1767892417,
-        "narHash": "sha256-8bW3q88CEg2u4hSP66Vf4lpbLonHz7hqDNBMcCY7E9U=",
-        "rev": "3497aa5c9457a9d88d71fa93a4a8368816fbeeba",
-        "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.05pre924538.3497aa5c9457/nixexprs.tar.xz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
         "lastModified": 1780203844,
         "narHash": "sha256-K5sT4jTpGs15ADhviMKNBH38REpPf5Q6mM1+N6cArVE=",
         "owner": "NixOS",
@@ -69,11 +58,29 @@
         "type": "github"
       }
     },
+    "nixpkgs-discord-krisp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779195837,
+        "narHash": "sha256-FMUh4vXmj6+EjxXyQ2LLe5yUPmQ3+zXQN7KVeYLMGEw=",
+        "owner": "FlameFlag",
+        "repo": "nixpkgs",
+        "rev": "90cdc6283e794e7e276fa60f6d27b98a27454f15",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FlameFlag",
+        "ref": "flameflag/push-vmswpuqmvzpt",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-discord-krisp": "nixpkgs-discord-krisp"
       }
     }
   },
