@@ -13,7 +13,6 @@
       ./hardware-configuration.nix
 
       inputs.self.nixosModules.default # "modules/default.nix"
-      inputs.home-manager.nixosModules.home-manager
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
     ];
   nixos.allModules.enable = true;
@@ -114,9 +113,6 @@
     config = {
       # NOTE: If you do not want unfree packages, change to "false".
       allowUnfree = true;
-      permittedInsecurePackages = [
-        "electron-39.8.10"
-      ];
     };
   };
 
@@ -199,14 +195,6 @@
   # NOTE: Enable Java module for github/gdzx/audiosource.
   # For use mobile as microphone (OPTIONAL)
   programs.java.enable = true;
-
-  # NOTE: Home Manager configuration
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
-    users.caio = import ../../users/caio/default.nix;
-  };
 
   system.stateVersion = "26.05"; # NOT CHANGE UNTIL READ RELEASE NOTES.
 

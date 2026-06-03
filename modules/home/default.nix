@@ -1,13 +1,11 @@
 # For home-manager modules.
-{ config, lib, inputs, ... }:
+{ config, lib, ... }:
+
 let
   cfg = config.home.allModules;
-
-  apps = ./apps.nix;
-in
-{
+in {
   imports = [
-    apps
+    ./apps.nix
   ];
 
   options.home.allModules.enable = lib.mkEnableOption "Enable all user-wide modules";

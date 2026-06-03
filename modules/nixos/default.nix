@@ -1,17 +1,13 @@
 # For NixOS modules.
 { config, lib, inputs, ... }:
+
 let
   cfg = config.nixos.allModules;
-
-  gaming = ./gaming.nix;
-  ssh = ./ssh.nix;
-  libvirt = ./libvirt.nix;
-in
-{
+in {
   imports = [
-    gaming
-    ssh
-    libvirt
+    ./gaming.nix
+    ./ssh.nix
+    ./libvirt.nix
   ];
 
   options.nixos.allModules.enable = lib.mkEnableOption "Enable all system-wide modules";

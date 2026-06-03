@@ -14,13 +14,22 @@
 
     overlays = import ./overlays { inherit inputs; };
     nixosModules.default = import ./modules/nixos;
-    homeManagerModules.default = import ./modules/home-manager;
+    homeManagerModules.default = import ./modules/home;
 
     nixosConfigurations = {
       X270 = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [
           ./hosts/X270/default.nix
+        ];
+      };
+    };
+    homeConfigurations = {
+      "caio@X270" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = { inherit inputs; };
+        modules = [
+          ./users/caio/default.nix
         ];
       };
     };
