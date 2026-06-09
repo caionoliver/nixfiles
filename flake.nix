@@ -7,38 +7,37 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-hardware = {
+    hardware = {
       url = "github:NixOS/nixos-hardware/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs-discord-krisp = {
-      url = "github:FlameFlag/nixpkgs/flameflag/push-vmswpuqmvzpt";
-      flake = false;
+    nixcord = {
+      url = "github:FlameFlag/nixcord";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs:
   let
-    lib = import ./lib inputs;
+    lib = import ./lib { inherit inputs self; };
   in {
     overlays = import ./overlays { inherit inputs; };
+
     nixosModules.default = import ./modules/nixos;
     homeManagerModules.default = import ./modules/home;
 
     nixosConfigurations = {
-      X270 = lib.mkSystem {
-        hostname = "X270";
+      laptop = lib.mkNixosHost {
         system = "x86_64-linux";
+        hostName = "X270";
+        mainUser = "caio";
       };
     };
-
     homeConfigurations = {
-      "caio@X270" = lib.mkUser {
-        username = "caio";
-        hostname = "X270";
+      "caio" = lib.mkHomeConfig {
         system = "x86_64-linux";
+        userName = "caio";
       };
     };
   };
 }
-

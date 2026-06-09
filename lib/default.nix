@@ -1,10 +1,4 @@
-inputs @ {
-  nixpkgs,
-  home-manager,
-  ...
-}:
+{ inputs, self, ... }@args:
 
-{
-  mkSystem = import ./mkSystem.nix inputs;
-  mkUser = import ./mkUser.nix inputs;
-}
+# Importa o mkSystem.nix repassando todos os argumentos recebidos
+import ./mkSystem.nix args

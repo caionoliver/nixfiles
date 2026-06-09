@@ -1,20 +1,14 @@
 # System Environment configuration (it replaces /etc/nixos/configuration.nix).
 # Check https://nixos.org/manual/nixos/stable/options for more options (stable branch).
 
-{
-  inputs,
-  config,
-  lib,
-  pkgs,
-  ...
-}: 
+{ config, inputs, lib, pkgs, mainUser, ... }:
+
 {
   imports = [
-      ./hardware-configuration.nix
+    inputs.hardware.nixosModules.lenovo-thinkpad-x270
 
-      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
-    ];
-  nixos.allModules.enable = true;
+    ./hardware-configuration.nix
+  ];
 
   # NOTE: systemd-boot configuration (UEFI only).
   boot.loader = {
@@ -26,7 +20,6 @@
   };
 
   networking = {
-    hostName = "NixOS";
     networkmanager.enable = true;
   #  proxy = { 
   #    default = "http://user:password@proxy:port/";
@@ -51,7 +44,6 @@
       };
     };
     libinput.enable = true; # Touchpad support.
-    printing.enable = false; # Printing system.
     pipewire = {
       enable = true;
       alsa = {
@@ -69,16 +61,19 @@
   security.rtkit.enable = true; # recommended for PipeWire setup.
 
   # NOTE: User and groups management.
-  users.users.caio = {
-    description = "Caio";
-    isNormalUser = true;
-    uid = 1000;
-    extraGroups = [
-      "wheel"
-      "audio"
-      "networkmanager"
-      "adbusers"
-    ];
+  users.users = {
+    ${mainUser} = {
+      description = "Caio";
+      isNormalUser = true;
+      uid = 1000;
+      extraGroups = [
+        "wheel"
+        "audio"
+        "networkmanager"
+        "adbusers"
+        "libvirt"
+      ];
+    };
   };
 
   # NOTE: Nix package management configuration.
@@ -102,16 +97,6 @@
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 7d";
-    };
-  };
-  nixpkgs = {
-    overlays = [
-      inputs.self.outputs.overlays.additions
-      inputs.self.outputs.overlays.modifications
-    ];
-    config = {
-      # NOTE: If you do not want unfree packages, change to "false".
-      allowUnfree = true;
     };
   };
 
@@ -144,7 +129,6 @@
     p7zip
     rar
     unar
-    unrar
     unzip
     xz
     zip
@@ -160,8 +144,10 @@
   environment.localBinInPath = true;
 
   # NOTE: appimage-run setup.
-  programs.appimage.enable = true;
-  programs.appimage.binfmt = true;
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
 
   services.flatpak.enable = true;
 

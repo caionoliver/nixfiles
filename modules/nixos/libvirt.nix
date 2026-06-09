@@ -1,10 +1,15 @@
-{ config, lib, pkgs,... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.nixos.libvirt;
 in
 {
   options.nixos.libvirt = {
     enable = lib.mkEnableOption "Enable manage Virtual Machines with libvirt";
+    users = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Users to add to the libvirtd group.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -27,7 +32,7 @@ in
     # NOTE: Install Virt-manager for manage QEMU.
     programs.virt-manager.enable = true;
 
-    users.groups.libvirtd.members = [ "caio" ];
+    users.groups.libvirtd.members = cfg.users;
 
     environment.systemPackages = with pkgs; [
       spice
