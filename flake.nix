@@ -26,7 +26,7 @@
     nixosModules = import ./modules/nixos;
     homeManagerModules = import ./modules/home;
 
-    metaModules = import ./modules/meta;
+    metaModules = import ./modules/.meta;
 
     nixosConfigurations = {
       laptop = lib.mkNixosHost {
@@ -36,7 +36,7 @@
       };
     };
     homeConfigurations = {
-      "caio" = lib.mkHomeConfig {
+      "caio@X270" = lib.mkHomeConfig {
         system = "x86_64-linux";
         userName = "caio";
       };
