@@ -1,4 +1,8 @@
-{ inputs, self, ... }@args:
+{ inputs, self, ... }:
+let
+  args = { inherit inputs self; };
 
-# Importa o mkSystem.nix repassando todos os argumentos recebidos
-import ./mkSystem.nix args
+  system = import ./system-profiles.nix args;
+in
+  system
+# // new lib here

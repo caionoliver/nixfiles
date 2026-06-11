@@ -1,9 +1,7 @@
 # For NixOS modules.
 {
-  imports = [
-    ./gaming.nix
-    ./ssh.nix
-    ./libvirt.nix
-  ];
+  gaming = import ./gaming.nix;
+  ssh = import ./ssh.nix;
+  libvirt = import ./libvirt.nix;
 
 }

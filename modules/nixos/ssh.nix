@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.nixos.ssh;
+  cfg = config.nm.ssh;
 in
 {
-  options.nixos.ssh = {
+  options.nm.ssh = {
     enable = lib.mkEnableOption "Turn on SSH support";
   };
 

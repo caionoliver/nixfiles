@@ -1,7 +1,5 @@
 # For home-manager modules.
 {
-  imports = [
-    ./discord.nix
-  ];
+  discord = import ./discord.nix;
 
 }

@@ -8,6 +8,10 @@
     ./git.nix
   ];
 
+  # NOTE: Loading all homeManagerModules
+  # All modules have been loaded before, you could disable them explicitly
+  hm.allModules.enable = true;
+
   # NOTE: Setup home configuration.
   home = {
     username = userName;

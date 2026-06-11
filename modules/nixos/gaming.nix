@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.nixos.gaming;
+  cfg = config.nm.gaming;
 in
 {
-  options.nixos.gaming = {
+  options.nm.gaming = {
     enable = lib.mkEnableOption "Common configurations for gaming";
   };
 

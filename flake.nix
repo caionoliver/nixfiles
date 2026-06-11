@@ -23,8 +23,10 @@
   in {
     overlays = import ./overlays { inherit inputs; };
 
-    nixosModules.default = import ./modules/nixos;
-    homeManagerModules.default = import ./modules/home;
+    nixosModules = import ./modules/nixos;
+    homeManagerModules = import ./modules/home;
+
+    metaModules = import ./modules/meta;
 
     nixosConfigurations = {
       laptop = lib.mkNixosHost {

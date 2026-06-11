@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.nixos.libvirt;
+  cfg = config.nm.libvirt;
 in
 {
-  options.nixos.libvirt = {
+  options.nm.libvirt = {
     enable = lib.mkEnableOption "Enable manage Virtual Machines with libvirt";
     users = lib.mkOption {
       type = lib.types.listOf lib.types.str;

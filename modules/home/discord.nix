@@ -2,12 +2,12 @@
 { config, lib, inputs, ... }:
 
 let
-  cfg = config.home.discord;
+  cfg = config.hm.discord;
 in {
 
   imports = [ inputs.nixcord.homeModules.nixcord ];
 
-  options.home.discord.enable = lib.mkEnableOption "Manage Discord configurations by Nixcord";
+  options.hm.discord.enable = lib.mkEnableOption "Manage Discord configurations by Nixcord";
 
   config = lib.mkIf cfg.enable {
     programs.nixcord = {

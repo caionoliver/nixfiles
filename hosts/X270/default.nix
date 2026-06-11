@@ -9,6 +9,10 @@
 
     ./hardware-configuration.nix
   ];
+  # NOTE: Loading all nixosModules
+  # All modules have been loaded before, you could disable them explicitly
+  nm.allModules.enable = true;
+  nm.libvirt.enable = false;
 
   # NOTE: systemd-boot configuration (UEFI only).
   boot.loader = {
