@@ -8,7 +8,7 @@ in
   imports = builtins.attrValues modules;
 
   options.nm.allModules.enable =
-    lib.mkEnableOption "Enable all NixOS modules";
+    lib.mkEnableOption "Enable all NixOS modules" // { default = true; };
 
   config = lib.mkIf cfg.enable {
     nm = builtins.listToAttrs (

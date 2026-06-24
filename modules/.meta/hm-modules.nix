@@ -8,7 +8,7 @@ in
   imports = builtins.attrValues modules;
 
   options.hm.allModules.enable =
-    lib.mkEnableOption "Enable all Home Manager modules";
+    lib.mkEnableOption "Enable all Home Manager modules" // { default = true; };
 
   config = lib.mkIf cfg.enable {
     hm = builtins.listToAttrs (

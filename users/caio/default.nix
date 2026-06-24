@@ -10,7 +10,7 @@
 
   # NOTE: Loading all homeManagerModules
   # All modules have been loaded before, you could disable them explicitly
-  hm.allModules.enable = true;
+  # hm.allModules.enable = true; # (default)
 
   # NOTE: Setup home configuration.
   home = {

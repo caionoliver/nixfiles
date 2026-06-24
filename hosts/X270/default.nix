@@ -11,7 +11,7 @@
   ];
   # NOTE: Loading all nixosModules
   # All modules have been loaded before, you could disable them explicitly
-  nm.allModules.enable = true;
+  # nm.allModules.enable = true; # (default)
   nm.libvirt.enable = false;
 
   # NOTE: systemd-boot configuration (UEFI only).
@@ -177,8 +177,16 @@
     graphics = {
       enable = true;
       enable32Bit = true; # for 32-bit applications such Wine
-      extraPackages = with pkgs; [ intel-media-driver ];
+      extraPackages = with pkgs; [
+        intel-media-driver
+      ];
+      extraPackages32 = with pkgs.driversi686Linux; [
+        intel-media-driver
+      ];
     };
+  };
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "iHD";
   };
 
   # NOTE: Enable Java module for github/gdzx/audiosource.
