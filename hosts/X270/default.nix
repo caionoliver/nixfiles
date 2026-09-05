@@ -1,35 +1,34 @@
-# System Environment configuration (it replaces /etc/nixos/configuration.nix).
-# Check https://nixos.org/manual/nixos/stable/options for more options (stable branch).
+# configuration.nix
 
 { config, inputs, lib, pkgs, mainUser, ... }:
-
 {
   imports = [
     inputs.hardware.nixosModules.lenovo-thinkpad-x270
-
     ./hardware-configuration.nix
   ];
-  # NOTE: Loading all nixosModules
-  # All modules have been loaded before, you could disable them explicitly
-  # nm.allModules.enable = true; # (default)
+  # NOTE: All local modules are imported by default; must be disabled explicitly.
   nm.libvirt.enable = false;
 
-  # NOTE: systemd-boot configuration (UEFI only).
   boot.loader = {
     systemd-boot.enable = true;
     efi = {
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";
     };
+    timeout = 0;
   };
 
-  networking = {
-    networkmanager.enable = true;
-  #  proxy = { 
-  #    default = "http://user:password@proxy:port/";
-  #    noProxy = "127.0.0.1,localhost,internal.domain";
-  #  };
+  boot.plymouth = {
+    enable = true;
+    theme = "bgrt";
   };
+  boot.consoleLogLevel = 3;
+  boot.initrd.verbose  = false;
+  boot.kernelParams = [
+    "quiet"
+    "udev.log_level=3"
+    "systemd.show_status=auto"
+  ];
 
   time.timeZone = "America/Bahia";
 
@@ -39,64 +38,43 @@
     useXkbConfig = true;
   };
 
-  # NOTE: X11 support, audio server, etc.
-  services = {
-    xserver = {
-      enable = true;
-      xkb = {
-        layout = "br";
-      };
-    };
-    libinput.enable = true; # Touchpad support.
-    pipewire = {
-      enable = true;
-      alsa = {
-        enable = true;
-        support32Bit = true;
-      };
-      pulse.enable = true;
-    };
-    displayManager.sddm = { # SDDM with Wayland support.
-      enable = true;
-      wayland.enable = true;
-    };
-    desktopManager.plasma6.enable = true;
+  services.xserver = {
+    enable = true;
+    xkb.layout = "br";
   };
-  security.rtkit.enable = true; # recommended for PipeWire setup.
+  services.libinput.enable = true;
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
+  services.desktopManager.plasma6.enable = true;
 
-  # NOTE: User and groups management.
-  users.users = {
-    ${mainUser} = {
-      description = "Caio";
-      isNormalUser = true;
-      uid = 1000;
-      extraGroups = [
-        "wheel"
-        "audio"
-        "networkmanager"
-        "adbusers"
-        "libvirt"
-      ];
-    };
+  # NOTE: "username" or "mainUser" are defined in flake.nix!
+  users.users.${mainUser} = {
+    description = "Caio"; # Change as you like;
+    isNormalUser = true;
+    uid = 1000;
+    extraGroups = [
+      "wheel"
+      "audio"
+      "networkmanager"
+      "adbusers"
+      "libvirt"
+    ];
   };
 
-  # NOTE: Nix package management configuration.
   nix = let
     flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
   in {
     settings = {
       experimental-features = [ "nix-command" "flakes" ];
-      flake-registry = ""; # Disable flake global registry.
-      nix-path = config.nix.nixPath; # For flakes on NIX_PATH.
+      flake-registry = "";
+      nix-path = config.nix.nixPath;
       auto-optimise-store = true;
     };
-
-    # NOTE: Disable channels, setting flakeInputs on flake registry and NIX_PATH.
     channel.enable = false;
-    registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
+    registry = lib.mapAttrs (_: flake: { inherit flake; }) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
-
-    # NOTE: Garbage collecting configuration.
     gc = {
       automatic = true;
       dates = "weekly";
@@ -104,96 +82,41 @@
     };
   };
 
-  # NOTE: System-wide package management.
   environment.systemPackages = with pkgs; [
-    # Environment
     hunspell
     hunspellDicts.pt_BR
-    libreoffice-qt
-
-    # Development
-    android-tools
-    python3
     vim
-
-    # Utils
     curl
-    fastfetch
-    fzf
-    killall
-    htop
-    pulseaudio
-    ripgrep
     wget
-    which
+    android-tools
+  ];
 
-    # File compression.
-    bzip2
-    gzip
-    p7zip
-    rar
-    unar
-    unzip
-    xz
-    zip
-
-    # Fonts.
+  fonts.packages = with pkgs; [
     corefonts
     vista-fonts
     freefont_ttf
   ];
-  programs.firefox.enable = true; # Firefox as default browser.
 
-  # NOTE: Enable .local/bin in $PATH
-  environment.localBinInPath = true;
-
-  # NOTE: appimage-run setup.
-  programs.appimage = {
-    enable = true;
-    binfmt = true;
+  programs = {
+    firefox.enable = true;
+    java.enable = true; # needed for gdzx/audiosource
+    appimage = {
+      enable = true;
+      binfmt = true;
+    };
   };
 
   services.flatpak.enable = true;
 
-  # NOTE: Firewall ports configuration.
-  networking.firewall = {
+  # NOTE: zRAM for memory swap, optional
+  zramSwap = {
     enable = true;
-    # allowedTCPPorts = [ ... ];
-    # allowedUDPPorts = [ ... ];
+    algorithm = "zstd";
+    memoryPercent = 75;
+    priority = 100;
   };
+  boot.kernel.sysctl."vm.swappiness" = 100;
 
-  # NOTE: Bluetooth setup.
-  hardware = {
-    bluetooth = {
-      enable = true;
-      powerOnBoot = false;
-      settings = {
-        General = {
-          Enable = "Source,Sink,Media,Socket";
-        };
-      };
-    };
-    # NOTE: Enable GPU acceleration
-    graphics = {
-      enable = true;
-      enable32Bit = true; # for 32-bit applications such Wine
-      extraPackages = with pkgs; [
-        intel-media-driver
-      ];
-      extraPackages32 = with pkgs.driversi686Linux; [
-        intel-media-driver
-      ];
-    };
-  };
-  environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "iHD";
-  };
-
-  # NOTE: Enable Java module for github/gdzx/audiosource.
-  # For use mobile as microphone (OPTIONAL)
-  programs.java.enable = true;
-
-  system.stateVersion = "26.05"; # NOT CHANGE UNTIL READ RELEASE NOTES.
-
+  # NOTE: DON'T CHANGE UNTIL YOU READ RELEASE NOTES
+  system.stateVersion = "26.05";
 }
-

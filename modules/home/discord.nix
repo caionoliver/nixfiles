@@ -14,7 +14,9 @@ in {
       enable = true;
       discord = {
         krisp.enable = true;
-        # openASAR.enable = true;
+        vencord.enable = false;
+        openASAR.enable = false;
+        silenceNoModClientWarning = true;
       };
     };
   };

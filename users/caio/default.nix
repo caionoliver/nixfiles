@@ -28,7 +28,7 @@
     gimp
     mpv
     pdfstudioviewer
-    masterpdfeditor
+    # masterpdfeditor
     obsidian
     bitwarden-desktop
     qbittorrent
